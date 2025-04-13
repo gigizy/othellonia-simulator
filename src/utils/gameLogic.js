@@ -81,18 +81,17 @@ export const getFlippableStones = (row, col, board, player) => {
 export const isCorner = (row, col) =>
   (row === 0 || row === SIZE - 1) && (col === 0 || col === SIZE - 1);
 
-export function calculateDamage({ flipCount, isThreat }) {
-  const baseNs = 1500;
-  const baseSs = 1500;
-  const bonusThreat = 2500;
+export function calculateDamage({ flipCount, isThreat, threatLevel = 1 }) {
+  const nsBase = 1500;
+  const ssBase = 1500;
+  const threatBonus = isThreat ? 2500 * threatLevel : 0;
 
-  if (flipCount === 0) return 0;
-
-  const ns = baseNs * Math.pow(1.2, flipCount - 1);
-  const ss = isThreat ? baseSs + bonusThreat : baseSs;
+  const ns = nsBase * Math.pow(1.2, flipCount - 1);
+  const ss = ssBase + threatBonus;
 
   return Math.round(ns + ss);
 }
+
 
 
 

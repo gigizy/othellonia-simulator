@@ -64,7 +64,7 @@ const PvPBoard = ({ onBack }) => {
     return false;
   };
 
-  const handleClick = (row, col, isThreat = false) => {
+  const handleClick = (row, col, isThreat = false, threatLevel = 1) => {
     if (gameOver) return;
 
     if (row === null && col === null) {
@@ -90,8 +90,9 @@ const PvPBoard = ({ onBack }) => {
     });
 
     const flipCount = flipped.length;
-    const damage = calculateDamage({ flipCount, isThreat });
+    const damage = calculateDamage({ flipCount, isThreat, threatLevel });
 
+    console.log('flipCount:', flipCount, 'isThreat:', isThreat, 'threatLevel:', threatLevel, 'damage:', damage);
 
     const turnNum = Math.ceil(turnCount / 2);
     const log = formatLogEntry(currentPlayer, turnNum, damage);

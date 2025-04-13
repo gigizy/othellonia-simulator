@@ -44,7 +44,7 @@ const PvCBoard = ({ aiColor = 'white', onBack }) => {
     return false;
   };
 
-  const handleClick = (row, col, isThreat = false, forcedColor = null) => {
+  const handleClick = (row, col, isThreat = false, threatLevel = 1, forcedColor = null) => {
     if (gameOver) return;
     const player = forcedColor || currentPlayer;
 
@@ -68,8 +68,8 @@ const PvCBoard = ({ aiColor = 'white', onBack }) => {
     });
 
     const flipCount = flipped.length;
-    const damage = calculateDamage({ flipCount, isThreat });
-
+    const damage = calculateDamage({ flipCount, isThreat, threatLevel });
+    
     const turnNum = Math.ceil(turnCount / 2);
     const log = formatLogEntry(player, turnNum, damage);
     setLogs(prev => [...prev, log]);

@@ -34,6 +34,7 @@ const GameBoard = ({
 }) => {
   const [validMoves, setValidMoves] = useState([]);
   const [threatenedMoves, setThreatenedMoves] = useState([]);
+  const [threatConnections, setThreatConnections] = useState({});
   const [isPassDialogVisible, setIsPassDialogVisible] = useState(false);
   const [passMessage, setPassMessage] = useState('');
   const firstRender = useRef(true);
@@ -41,6 +42,7 @@ const GameBoard = ({
   const updateValidMoves = (board, player) => {
     const moves = [];
     const threats = [];
+    const connections = {};
     const opponent = player === 'black' ? 'white' : 'black';
 
     for (let row = 0; row < SIZE; row++) {
@@ -51,6 +53,7 @@ const GameBoard = ({
             let r = row + dx;
             let c = col + dy;
             let hasOpponentBetween = false;
+            let connectionCount = 0;
             while (
               r >= 0 && r < SIZE &&
               c >= 0 && c < SIZE &&
@@ -67,8 +70,9 @@ const GameBoard = ({
               board[r][c]?.color === player &&
               board[r][c].source === 'placed'
             ) {
-              threats.push(`${row}-${col}`);
-              break;
+              const key = `${row}-${col}`;
+              threats.push(key);
+              connections[key] = (connections[key] || 0) + 1;
             }
           }
         }
@@ -76,6 +80,7 @@ const GameBoard = ({
     }
     setValidMoves(moves);
     setThreatenedMoves(threats);
+    setThreatConnections(connections);
     return moves;
   };
 
@@ -93,8 +98,10 @@ const GameBoard = ({
 
     if (aiEnabled && currentPlayer === aiColor && currentMoves.length > 0) {
       const [row, col] = currentMoves[Math.floor(Math.random() * currentMoves.length)];
-      const isThreat = threatenedMoves.includes(`${row}-${col}`);
-      setTimeout(() => onMove(row, col, isThreat), 400);
+      const key = `${row}-${col}`;
+      const isThreat = threatenedMoves.includes(key);
+      const threatLevel = threatConnections[key] || 1;
+      setTimeout(() => onMove(row, col, isThreat, threatLevel), 400);
     }
   }, [boardState.board, currentPlayer]);
 
@@ -117,8 +124,10 @@ const GameBoard = ({
                 className={cellClass}
                 onClick={() => {
                   if (isValid) {
-                    const isThreat = threatenedMoves.includes(`${rIdx}-${cIdx}`);
-                    onMove(rIdx, cIdx, isThreat);
+                    const key = `${rIdx}-${cIdx}`;
+                    const isThreat = threatenedMoves.includes(key);
+                    const threatLevel = threatConnections[key] || 1;
+                    onMove(rIdx, cIdx, isThreat, threatLevel);
                   }
                 }}
               >
@@ -152,7 +161,7 @@ const GameBoard = ({
             <button
               onClick={() => {
                 setIsPassDialogVisible(false);
-                onMove(null, null);
+                onMove(null, null, false, 1);
               }}
             >
               OK
