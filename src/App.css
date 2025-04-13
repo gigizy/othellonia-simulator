@@ -22,3 +22,42 @@ body {
   margin-bottom: 20px;
   font-size: 2rem;
 }
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+button {
+  background-color: #444;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 5px;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #666;
+}
+
+.opening-hint {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #fca311;
+  font-weight: bold;
+}
+
+.log-entry-black::before {
+  content: '⚫';
+  margin-right: 5px;
+}
+
+.log-entry-white::before {
+  content: '⚪';
+  margin-right: 5px;
+}
