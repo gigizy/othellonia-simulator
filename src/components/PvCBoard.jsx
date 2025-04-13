@@ -47,52 +47,58 @@ const PvCBoard = ({ aiColor = 'white', onBack }) => {
   const handleClick = (row, col, isThreat = false, threatLevel = 1, forcedColor = null) => {
     if (gameOver) return;
     const player = forcedColor || currentPlayer;
-
-    if (row === null && col === null) {
-      const newPassCount = passCount + 1;
-      const gameEnded = checkGameEnd(newPassCount, blackScore, whiteScore);
-      if (gameEnded) return;
-      setPassCount(newPassCount);
-      setIsBlackTurn(prev => !prev);
-      setTurnCount(prev => prev + 1);
-      return;
+  
+    const isPass = row === null && col === null || !isValidMove(row, col, board, player);
+    let newBoard = board;
+    let flipped = [];
+    let flipCount = 0;
+    let damage = 0;
+  
+    if (!isPass) {
+      flipped = getFlippableStones(row, col, board, player);
+      newBoard = board.map(row => row.slice());
+      newBoard[row][col] = { color: player, source: 'placed' };
+      flipped.forEach(([r, c]) => {
+        newBoard[r][c] = { color: player, source: 'flipped' };
+      });
+  
+      flipCount = flipped.length;
+      damage = calculateDamage({ flipCount, isThreat, threatLevel });
+  
+      const turnNum = Math.ceil(turnCount / 2);
+      const log = formatLogEntry(player, turnNum, damage);
+      setLogs(prev => [...prev, log]);
     }
-
-    if (!isValidMove(row, col, board, player)) return;
-
-    const flipped = getFlippableStones(row, col, board, player);
-    const newBoard = board.map(row => row.slice());
-    newBoard[row][col] = { color: player, source: 'placed' };
-    flipped.forEach(([r, c]) => {
-      newBoard[r][c] = { color: player, source: 'flipped' };
-    });
-
-    const flipCount = flipped.length;
-    const damage = calculateDamage({ flipCount, isThreat, threatLevel });
-    
-    const turnNum = Math.ceil(turnCount / 2);
-    const log = formatLogEntry(player, turnNum, damage);
-    setLogs(prev => [...prev, log]);
-
+  
     let newBlack = blackScore;
     let newWhite = whiteScore;
+  
+    if (!isPass) {
+      if (player === 'black') {
+        newWhite = Math.max(0, whiteScore - damage);
+        setWhiteScore(newWhite);
+      } else {
+        newBlack = Math.max(0, blackScore - damage);
+        setBlackScore(newBlack);
+      }
+    }
+  
+    const newPassCount = isPass ? passCount + 1 : 0;
 
-    if (player === 'black') {
-      newWhite = Math.max(0, whiteScore - damage);
-      setWhiteScore(newWhite);
-    } else {
-      newBlack = Math.max(0, blackScore - damage);
-      setBlackScore(newBlack);
+    if (!isPass) {
+      setBoard(newBoard);
     }
 
-    const gameEnded = checkGameEnd(0, newBlack, newWhite);
+    const gameEnded = checkGameEnd(newPassCount, newBlack, newWhite);
     if (gameEnded) return;
+  
 
-    setBoard(newBoard);
+  
     setIsBlackTurn(prev => !prev);
     setTurnCount(prev => prev + 1);
-    setPassCount(0);
+    setPassCount(newPassCount);
   };
+  
 
   const handleReset = () => {
     setBoard(createInitialBoard());
