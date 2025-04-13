@@ -5,6 +5,7 @@ import {
   getFlippableStones,
   isValidMove,
   calculateDamage,
+  hasValidMoves
 } from '../utils/gameLogic';
 import { formatLogEntry } from '../utils/logUtils';
 import ScoreBoard from './ui/ScoreBoard';
@@ -18,11 +19,45 @@ const PvCBoard = ({ aiColor = 'white', onBack }) => {
   const [whiteScore, setWhiteScore] = useState(30000);
   const [logs, setLogs] = useState([]);
   const [turnCount, setTurnCount] = useState(1);
+  const [passCount, setPassCount] = useState(0);
+  const [gameOver, setGameOver] = useState(false);
+  const [winner, setWinner] = useState(null);
 
   const currentPlayer = isBlackTurn ? 'black' : 'white';
 
-  const handleClick = (row, col, forcedColor = null) => {
+  const checkGameEnd = (nextPass, newBlackScore, newWhiteScore) => {
+    if (newBlackScore <= 0 || newWhiteScore <= 0) {
+      const winner = newBlackScore <= 0 ? '白' : '黒';
+      setWinner(`${winner}の勝ち！（相手のスコアが0）`);
+      setGameOver(true);
+      return true;
+    } else if (nextPass >= 2) {
+      if (newBlackScore === newWhiteScore) {
+        setWinner('引き分け！');
+      } else {
+        const winner = newBlackScore > newWhiteScore ? '黒' : '白';
+        setWinner(`${winner}の勝ち！（両者パス）`);
+      }
+      setGameOver(true);
+      return true;
+    }
+    return false;
+  };
+
+  const handleClick = (row, col, isThreat = false, forcedColor = null) => {
+    if (gameOver) return;
     const player = forcedColor || currentPlayer;
+
+    if (row === null && col === null) {
+      const newPassCount = passCount + 1;
+      const gameEnded = checkGameEnd(newPassCount, blackScore, whiteScore);
+      if (gameEnded) return;
+      setPassCount(newPassCount);
+      setIsBlackTurn(prev => !prev);
+      setTurnCount(prev => prev + 1);
+      return;
+    }
+
     if (!isValidMove(row, col, board, player)) return;
 
     const flipped = getFlippableStones(row, col, board, player);
@@ -33,22 +68,30 @@ const PvCBoard = ({ aiColor = 'white', onBack }) => {
     });
 
     const flipCount = flipped.length;
-    const isThreat = false; // optional: threat logic
     const damage = calculateDamage({ flipCount, isThreat });
 
     const turnNum = Math.ceil(turnCount / 2);
     const log = formatLogEntry(player, turnNum, damage);
     setLogs(prev => [...prev, log]);
 
+    let newBlack = blackScore;
+    let newWhite = whiteScore;
+
     if (player === 'black') {
-      setWhiteScore(prev => Math.max(0, prev - damage));
+      newWhite = Math.max(0, whiteScore - damage);
+      setWhiteScore(newWhite);
     } else {
-      setBlackScore(prev => Math.max(0, prev - damage));
+      newBlack = Math.max(0, blackScore - damage);
+      setBlackScore(newBlack);
     }
+
+    const gameEnded = checkGameEnd(0, newBlack, newWhite);
+    if (gameEnded) return;
 
     setBoard(newBoard);
     setIsBlackTurn(prev => !prev);
     setTurnCount(prev => prev + 1);
+    setPassCount(0);
   };
 
   const handleReset = () => {
@@ -58,6 +101,9 @@ const PvCBoard = ({ aiColor = 'white', onBack }) => {
     setBlackScore(30000);
     setWhiteScore(30000);
     setLogs([]);
+    setPassCount(0);
+    setGameOver(false);
+    setWinner(null);
   };
 
   return (
@@ -72,19 +118,15 @@ const PvCBoard = ({ aiColor = 'white', onBack }) => {
         logs={logs}
         updateLogs={setLogs}
         boardState={{ board, turnCount }}
-        setBoardState={({ board, turnCount }) => {
-          setBoard(board);
-          setTurnCount(turnCount);
-        }}
-        setLogs={setLogs}
-        setIsBlackTurn={setIsBlackTurn}
-        setTurnCount={setTurnCount}
-        setBlackScore={setBlackScore}
-        setWhiteScore={setWhiteScore}
         showReset={true}
         onReset={handleReset}
       />
-
+      {gameOver && (
+        <div className="result-banner">
+          <h2>ゲーム終了</h2>
+          <p>{winner}</p>
+        </div>
+      )}
       <div className="controls">
         <button onClick={onBack}>← メニューに戻る</button>
       </div>

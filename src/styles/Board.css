@@ -196,3 +196,44 @@
   font-size: 1rem;
   color: #ffcc66;
 }
+
+/* ====== パス通知モーダル ====== */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal {
+  background-color: #333;
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  text-align: center;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.modal button {
+  margin-top: 1rem;
+  padding: 10px 20px;
+  background-color: #666;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.modal button:hover {
+  background-color: #888;
+}

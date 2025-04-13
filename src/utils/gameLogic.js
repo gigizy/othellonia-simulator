@@ -81,11 +81,20 @@ export const getFlippableStones = (row, col, board, player) => {
 export const isCorner = (row, col) =>
   (row === 0 || row === SIZE - 1) && (col === 0 || col === SIZE - 1);
 
-export const calculateDamage = ({ flipCount, isThreat, baseNs = 1500, baseSs = 1500 }) => {
-  const ns = baseNs * Math.pow(1.2, Math.max(flipCount - 1, 0));
-  const ss = isThreat ? baseSs + 2500 : baseSs;
+export function calculateDamage({ flipCount, isThreat }) {
+  const baseNs = 1500;
+  const baseSs = 1500;
+  const bonusThreat = 2500;
+
+  if (flipCount === 0) return 0;
+
+  const ns = baseNs * Math.pow(1.2, flipCount - 1);
+  const ss = isThreat ? baseSs + bonusThreat : baseSs;
+
   return Math.round(ns + ss);
-};
+}
+
+
 
 
 export const formatLogEntry = (player, playerTurnCount, damage) => {
@@ -96,3 +105,14 @@ export const formatLogEntry = (player, playerTurnCount, damage) => {
     className: colorClass
   };
 };
+
+export function hasValidMoves(board, player) {
+  for (let row = 0; row < board.length; row++) {
+    for (let col = 0; col < board[row].length; col++) {
+      if (isValidMove(row, col, board, player)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}

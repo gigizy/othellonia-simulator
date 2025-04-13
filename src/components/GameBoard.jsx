@@ -3,7 +3,8 @@ import {
   isValidMove,
   getFlippableStones,
   isCorner,
-  calculateDamage
+  calculateDamage,
+  hasValidMoves
 } from '../utils/gameLogic';
 import '../styles/Board.css';
 
@@ -33,6 +34,8 @@ const GameBoard = ({
 }) => {
   const [validMoves, setValidMoves] = useState([]);
   const [threatenedMoves, setThreatenedMoves] = useState([]);
+  const [isPassDialogVisible, setIsPassDialogVisible] = useState(false);
+  const [passMessage, setPassMessage] = useState('');
   const firstRender = useRef(true);
 
   const updateValidMoves = (board, player) => {
@@ -79,9 +82,19 @@ const GameBoard = ({
   useEffect(() => {
     const currentMoves = updateValidMoves(boardState.board, currentPlayer);
 
+    if (currentMoves.length === 0) {
+      const message = currentPlayer === 'black'
+        ? 'あなた（黒）がパスしました'
+        : '相手（白）がパスしました';
+      setPassMessage(message);
+      setIsPassDialogVisible(true);
+      return;
+    }
+
     if (aiEnabled && currentPlayer === aiColor && currentMoves.length > 0) {
       const [row, col] = currentMoves[Math.floor(Math.random() * currentMoves.length)];
-      setTimeout(() => onMove(row, col, aiColor), 400);
+      const isThreat = threatenedMoves.includes(`${row}-${col}`);
+      setTimeout(() => onMove(row, col, isThreat), 400);
     }
   }, [boardState.board, currentPlayer]);
 
@@ -102,7 +115,12 @@ const GameBoard = ({
               <div
                 key={`${rIdx}-${cIdx}`}
                 className={cellClass}
-                onClick={() => onMove(rIdx, cIdx)}
+                onClick={() => {
+                  if (isValid) {
+                    const isThreat = threatenedMoves.includes(`${rIdx}-${cIdx}`);
+                    onMove(rIdx, cIdx, isThreat);
+                  }
+                }}
               >
                 {cell && (
                   <div
@@ -116,6 +134,7 @@ const GameBoard = ({
           })
         )}
       </div>
+
       <div className="controls">
         {showReset && <button onClick={onReset}>リセット</button>}
         {showUndo && (
@@ -125,6 +144,22 @@ const GameBoard = ({
           <button onClick={onRedo} disabled={future.length === 0}>1手進める</button>
         )}
       </div>
+
+      {isPassDialogVisible && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <p>{passMessage}</p>
+            <button
+              onClick={() => {
+                setIsPassDialogVisible(false);
+                onMove(null, null);
+              }}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };
