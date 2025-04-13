@@ -1,0 +1,198 @@
+/* ====== レイアウト & 全体配置 ====== */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(6, 50px);
+  grid-template-rows: repeat(6, 50px);
+  gap: 2px;
+  width: fit-content;
+}
+
+
+/* ====== 各マスの見た目（盤面） ====== */
+
+.cell {
+  width: 50px;
+  height: 50px;
+  border: 1px solid #cccccc;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.normal-cell {
+  background-color: #b9b2af; /* ベージュ */
+}
+
+.corner-cell {
+  background-color: #6e6e6b; /* グレー */
+}
+
+.highlight {
+  background-color: #d7d58c; /* 合法手の黄色 */
+}
+
+.threat-highlight {
+  background-color: #e57c4c; /* 脅威マスの赤 */
+}
+
+
+/* ====== 石の見た目 ====== */
+
+.stone-black,
+.stone-white {
+  position: relative;
+  border-radius: 50%;
+  width: 80%;
+  height: 80%;
+}
+
+.stone-black {
+  background-color: black;
+}
+
+.stone-white {
+  background-color: white;
+  box-shadow: inset 0 0 3px #888;
+}
+
+/* 置いた石マーク（★） */
+.marked::after {
+  content: "★";
+  color: gold;
+  font-size: 20px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+
+/* ====== UI表示：ターン・スコア・ログなど ====== */
+
+.turn-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #fff;
+  gap: 10px;
+}
+
+.stone-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scoreboard {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: white;
+}
+
+
+/* ====== メッセージウィンドウ ====== */
+
+.message {
+  color: #ffd700;
+  font-size: 1.1rem;
+  margin: 10px;
+  font-weight: bold;
+  text-shadow: 0 0 5px black;
+}
+
+.message-box {
+  background-color: #333;
+  color: white;
+  padding: 10px 20px;
+  border: 1px solid #777;
+  border-radius: 8px;
+  margin: 10px auto;
+  width: fit-content;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.message-box button {
+  background-color: #555;
+  color: white;
+  border: none;
+  padding: 5px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.message-box button:hover {
+  background-color: #777;
+}
+
+
+/* ====== ボタン類（リセット・巻き戻しなど） ====== */
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.controls button {
+  padding: 5px 12px;
+  font-size: 0.9rem;
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.controls button:disabled {
+  background-color: #222;
+  color: #777;
+  cursor: not-allowed;
+}
+
+
+/* ====== バトルログ表示 ====== */
+
+.log-box {
+  max-height: 150px;
+  overflow-y: auto;
+  background-color: #111;
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid #444;
+  width: 300px;
+  color: #eee;
+  font-size: 0.9rem;
+  border-radius: 6px;
+}
+
+.log-box h3 {
+  margin-top: 0;
+  margin-bottom: 6px;
+  font-size: 1rem;
+  color: #ffcc66;
+}
